@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: driveease-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=driveease_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  eureka-server:
+    build: ./eureka-server
+    ports:
+      - "8761:8761"
+    environment:
+      - PORT=8761
+
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - EUREKA_URL=http://eureka-server:8761/eureka/apps
+    depends_on:
+      - eureka-server
+
+  user-service:
+    build: ./user-service
+    ports:
+      - "8081:8081"
+    environment:
+      - PORT=8081
+      - EUREKA_URL=http://eureka-server:8761/eureka/apps
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=driveease_db
+    depends_on:
+      - eureka-server
+      - postgres
+
+  vehicle-service:
+    build: ./vehicle-service
+    ports:
+      - "8082:8082"
+    environment:
+      - PORT=8082
+      - EUREKA_URL=http://eureka-server:8761/eureka/apps
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=driveease_db
+    depends_on:
+      - eureka-server
+      - postgres
+
+  booking-service:
+    build: ./booking-service
+    ports:
+      - "8083:8083"
+    environment:
+      - PORT=8083
+      - VEHICLE_SERVICE_URL=http://vehicle-service:8082/api/v1/vehicles
+      - EUREKA_URL=http://eureka-server:8761/eureka/apps
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=driveease_db
+    depends_on:
+      - eureka-server
+      - vehicle-service
+      - postgres
+
+volumes:
+  postgres_data:
+

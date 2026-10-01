@@ -1,0 +1,81 @@
+### DriveEase Fleet Operations REST API Test Suite
+
+### 1. Owner Login (Success)
+POST http://localhost:8080/api/v1/users/owner/login
+Content-Type: application/json
+
+{
+  "email": "owner12@gmail.com",
+  "password": "123456"
+}
+
+### 2. Customer Login (Success)
+POST http://localhost:8080/api/v1/users/customer/login
+Content-Type: application/json
+
+{
+  "email": "customer@driveease.com",
+  "password": "password123"
+}
+
+### 3. Validation Error: Invalid Email Domain (@yahoo.com) -> 400 Bad Request
+POST http://localhost:8080/api/v1/users/customer/register
+Content-Type: application/json
+
+{
+  "email": "test@yahoo.com",
+  "password": "password123",
+  "firstName": "John",
+  "lastName": "Doe"
+}
+
+### 4. Validation Error: Short Password (< 6 chars) -> 400 Bad Request
+POST http://localhost:8080/api/v1/users/customer/register
+Content-Type: application/json
+
+{
+  "email": "test@gmail.com",
+  "password": "12345",
+  "firstName": "Test",
+  "lastName": "User"
+}
+
+### 5. Security Error: Expired / Invalid JWT -> 401/403 Forbidden
+GET http://localhost:8080/api/v1/users/me
+Authorization: Bearer INVALID_EXPIRED_JWT_TOKEN
+
+### 6. Create Valid Booking (Requires Valid Customer Bearer Token)
+# @name customerLogin
+POST http://localhost:8080/api/v1/users/customer/login
+Content-Type: application/json
+
+{
+  "email": "customer@driveease.com",
+  "password": "password123"
+}
+
+### Use accessToken from response above:
+POST http://localhost:8080/api/v1/customer/bookings
+Content-Type: application/json
+Authorization: Bearer {{customerLogin.response.body.accessToken}}
+
+{
+  "vehicleId": "v-101",
+  "startDate": "2026-11-10T09:00:00Z",
+  "endDate": "2026-11-14T18:00:00Z",
+  "pickupLocation": "Mumbai Central Hub",
+  "returnLocation": "Mumbai Central Hub"
+}
+
+### 7. Rejected Overlapping Booking -> 409 Conflict
+POST http://localhost:8080/api/v1/customer/bookings
+Content-Type: application/json
+Authorization: Bearer {{customerLogin.response.body.accessToken}}
+
+{
+  "vehicleId": "v-101",
+  "startDate": "2026-11-11T10:00:00Z",
+  "endDate": "2026-11-13T12:00:00Z",
+  "pickupLocation": "Mumbai Central Hub",
+  "returnLocation": "Mumbai Central Hub"
+}

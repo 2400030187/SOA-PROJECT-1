@@ -1,0 +1,235 @@
+{
+	"info": {
+		"_postman_id": "8f3a12bc-9d01-4f5e-821b-driveease001",
+		"name": "DriveEase Fleet Operations API Suite",
+		"description": "Comprehensive test collection covering authentication, valid bookings, server-side overlap rejection, email domain restrictions, password length rules, and invalid JWT token checks.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Authentication - Owner Login (Success)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"owner12@gmail.com\",\n  \"password\": \"123456\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/v1/users/owner/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"users",
+						"owner",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "2. Authentication - Customer Login (Success)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"customer@driveease.com\",\n  \"password\": \"password123\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/v1/users/customer/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"users",
+						"customer",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3. Validation Error - Invalid Email Domain",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"user@yahoo.com\",\n  \"password\": \"password123\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/v1/users/customer/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"users",
+						"customer",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "4. Validation Error - Short Password (< 6 chars)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"testuser@gmail.com\",\n  \"password\": \"12345\",\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/v1/users/customer/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"users",
+						"customer",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "5. Security Error - Expired / Invalid JWT Token",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer INVALID_EXPIRED_JWT_TOKEN_HERE"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8080/api/v1/users/me",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"users",
+						"me"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "6. Booking - Create Valid Reservation",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{jwt_token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"vehicleId\": \"v-101\",\n  \"startDate\": \"2026-11-01T09:00:00Z\",\n  \"endDate\": \"2026-11-05T18:00:00Z\",\n  \"pickupLocation\": \"Mumbai Central Hub\",\n  \"returnLocation\": \"Mumbai Central Hub\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/v1/customer/bookings",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"customer",
+						"bookings"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "7. Booking - Rejected Overlapping Reservation (409)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{jwt_token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"vehicleId\": \"v-101\",\n  \"startDate\": \"2026-11-02T10:00:00Z\",\n  \"endDate\": \"2026-11-04T12:00:00Z\",\n  \"pickupLocation\": \"Mumbai Central Hub\",\n  \"returnLocation\": \"Mumbai Central Hub\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/v1/customer/bookings",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"customer",
+						"bookings"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

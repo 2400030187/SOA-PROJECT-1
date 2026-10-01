@@ -1,0 +1,14 @@
+{
+  "name": "vehicle-service",
+  "version": "1.0.0",
+  "description": "DriveEase Vehicle Inventory & Availability Engine Microservice",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "pg": "^8.23.0"
+  }
+}
